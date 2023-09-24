@@ -1,0 +1,61 @@
+version: '3.1'
+
+services:
+
+  api:
+    container_name: api
+    image: api:latest
+    restart: always
+    #ports:
+     # - 8500:5000
+
+    volumes:
+      - /home/vagrant/projet_docker/student-list/simple_api/student_age.json:/data/student_age.json
+    networks:
+      - studentlist
+  my_apache:
+    container_name: my_apache
+    image: php:apache
+    restart: always
+    depends_on: 
+      - api
+    environment:
+      USERNAME: "toto"
+      PASSWORD: "python"
+    volumes:
+      - ./website:/var/www/html
+    ports:
+      - 8080:80
+    networks:
+      - studentlist
+  registry:
+    container_name: resgitry
+    image: registry:2
+    restart: always
+    ports:
+      - 5000:5000
+    networks:
+      - studentlist
+  registry-ui:
+    depends_on:
+      - registry
+    container_name: resgitry-ui
+    image: joxit/docker-registry-ui:main
+    restart: always
+    ports:
+      - 80:80
+    networks:
+      - studentlist
+    environment:
+      - SINGLE_REGISTRY=true
+      - REGISTRY_TITLE="Credo Ngoukeng"
+      - DELETE_IMAGES=true
+      - SHOW_CONTENT_DIGEST=true
+      - NGINX_PROXY_PASS_URL=http://registry:5000
+      - SHOW_CATALOG_NB_TAGS=true
+      - TAGLIST_PAGE_SIZE=10
+      - REGISTRY_SECURED=false
+      - CATALOG_ELEMENTS_LIMIT=10
+
+networks:
+ studentlist:
